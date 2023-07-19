@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken')//permite o acesso da senha
 
 //helpers
 const createUserToken = require('../helpers/create-user-token')
-const { json } = require('sequelize')
+const getToken = require('../helpers/get-token')
+//const { json } = require('sequelize')
 
 module.exports = class UserController {
     //criar usuario
@@ -84,12 +85,12 @@ module.exports = class UserController {
             return
         }
         //await o usuario vai ter que aguardar a aceitação/comando.
-        const user = await User.findOne({where: {email:email}})
+        const user = await User.findOne({ where: { email: email } })
         //FindOne = comando sql que irá buscar o email correspondente no banco de dados, verificando se ele existe 
         //FindOne = 'Busque um'
 
-        if(!User){//validação de um usuario não existente, caso tente fazer login com dados não cadastrados
-            res.status(422).json({message: 'Email não encontrado'})
+        if (!User) {//validação de um usuario não existente, caso tente fazer login com dados não cadastrados
+            res.status(422).json({ message: 'Email não encontrado' })
             return
         }
 
@@ -97,11 +98,51 @@ module.exports = class UserController {
         //O 'Compare' ele compara o password com o atribudo de user.password
         const checkPassword = await bcrypt.compare(password, user.password)//o user.password está pegando no 'const user'
 
-        if(!checkPassword){
-            res.status(422).json({message: 'Senha incorreta'})
+        if (!checkPassword) {
+            res.status(422).json({ message: 'Senha incorreta' })
             return
         }
 
-        await createUserToken(user,req,res)
+        await createUserToken(user, req, res)
+    }
+    //O header manda tudo no Token 
+    //O body manda tudo no banco de dados
+
+    //Verificar se o usuario está logado
+    static async checkUser(req, res) {
+        let currentUser 
+
+        if(req.headers.authorization){
+            const token = getToken(req)
+            //jwt vem da biblioteca
+
+            const decoded = jwt.verify(token,'nossosecret')
+
+            currentUser = await User.findByPk(decoded.id) //findByPk = "Encontrar por chave primaria"(irá buscar pelo Id)
+           
+            currentUser.password = undefined
+            //Por questão de segurança a senha será entregue no front como 'indefinido' para não permitir sua visualização
+        } else {
+            currentUser = null
+        }
+
+        res.status(200).send(currentUser)
+    }
+
+    static async getUserById(req, res){
+        const id = req.params.id
+
+        const user = await User.findByPk(id, {
+            where: { id: id }
+        })
+
+        if(!user){
+            res.status(422).json({message: 'Usuario não encontrado'})
+            return
+        }
+
+        user.password = undefined
+
+        res.status(200).json({ user })
     }
 }

@@ -8,5 +8,9 @@ const UserController = require('../Controllers/UserController')
 router.post('/register', UserController.register)
 //Rota para criar um login
 router.post('/login', UserController.login)
+//Rota para criar um checamento de usuario
+router.get('/checkuser', UserController.checkUser)
+//Rota para criar para encontrar o usuario perdido
+router.get('/:id', UserController.getUserById)
 
 module.exports = router

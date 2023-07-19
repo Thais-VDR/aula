@@ -6,7 +6,7 @@ async function createUserToken(user, req, res){
 const token = jwt.sign({
     name: user.name,
     id:user.id
-},  'nossosecret')//Mudar o nosso segredo para melhorar a criptografia
+},  'nossosecret')//Mudar o nossosecret para melhorar a criptografia
 
 //retornar o token
 res.status(200).json({
