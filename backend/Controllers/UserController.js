@@ -7,30 +7,31 @@ const jwt = require('jsonwebtoken')//permite o acesso da senha
 
 //helpers
 const createUserToken = require('../helpers/create-user-token')
+const { json } = require('sequelize')
 
-module.exports = class UserController{
+module.exports = class UserController {
     //criar usuario
-    static async register(req,res){
-        const{name,email,password,phone,confirmpassword} = req.body
+    static async register(req, res) {
+        const { name, email, password, phone, confirmpassword } = req.body
         //validações
-        if(!name){
-            res.status(422).json({message: 'O nome é obrigatório'})
+        if (!name) {
+            res.status(422).json({ message: 'O nome é obrigatório' })
             return
         }
-        if(!email){
-            res.status(422).json({message: 'O email é obrigatório'})
+        if (!email) {
+            res.status(422).json({ message: 'O email é obrigatório' })
             return
         }
-        if(!password){
-            res.status(422).json({message: 'A senha é obrigatório'})
+        if (!password) {
+            res.status(422).json({ message: 'A senha é obrigatório' })
             return
         }
-        if(!confirmpassword){
-            res.status(422).json({message: 'O confirma senha é obrigatório'})
+        if (!confirmpassword) {
+            res.status(422).json({ message: 'O confirma senha é obrigatório' })
             return
         }
-        if(!phone){
-            res.status(422).json({message: 'O telefone é obrigatório'})
+        if (!phone) {
+            res.status(422).json({ message: 'O telefone é obrigatório' })
             return
         }
 
@@ -42,15 +43,15 @@ module.exports = class UserController{
 
         //Checar se o usuario existe
         //Mostra se o usuario foi cadastrado novamente ou não
-        const userExists = await User.findOne({where: {email: email}})
-        
-        if(userExists){
-            res.status(422).json({message: 'Email já cadastrado'})
+        const userExists = await User.findOne({ where: { email: email } })
+
+        if (userExists) {
+            res.status(422).json({ message: 'Email já cadastrado' })
             return
-           //O return vazio quebra a compilação, gera um "break"
-        } 
-         if(password != confirmpassword){
-            res.status(422).json({message: 'A confirmação está incorreta'})
+            //O return vazio quebra a compilação, gera um "break"
+        }
+        if (password != confirmpassword) {
+            res.status(422).json({ message: 'A confirmação está incorreta' })
             return
         }
         const user = new User({
@@ -60,13 +61,47 @@ module.exports = class UserController{
             password: passwordHash
         })
 
-        try{
-          //criando o usuario no banco
-          const newUser = await user.save()
-          //entregar o token para o novo user
-          await createUserToken(newUser, req, res)
-        } catch(error){
-            res.status(500).json({message: error.message})
+        try {
+            //criando o usuario no banco
+            const newUser = await user.save()
+            //entregar o token para o novo user
+            await createUserToken(newUser, req, res)
+        } catch (error) {
+            res.status(500).json({ message: error.message })
         }
+    }
+    //realizar login
+    static async login(req, res) {
+        const { email, password } = req.body
+
+        //validações do login
+        if (!email) {
+            res.status(422).json({ message: 'O email é obrigatório' })
+            return // relembrando, um return gera um "break" no sistema, parando ele.
+        }
+        if (!password) {
+            res.status(422).json({ message: 'O password é obrigatório' })
+            return
+        }
+        //await o usuario vai ter que aguardar a aceitação/comando.
+        const user = await User.findOne({where: {email:email}})
+        //FindOne = comando sql que irá buscar o email correspondente no banco de dados, verificando se ele existe 
+        //FindOne = 'Busque um'
+
+        if(!User){//validação de um usuario não existente, caso tente fazer login com dados não cadastrados
+            res.status(422).json({message: 'Email não encontrado'})
+            return
+        }
+
+        //Checar se o password é igual a senha do banco
+        //O 'Compare' ele compara o password com o atribudo de user.password
+        const checkPassword = await bcrypt.compare(password, user.password)//o user.password está pegando no 'const user'
+
+        if(!checkPassword){
+            res.status(422).json({message: 'Senha incorreta'})
+            return
+        }
+
+        await createUserToken(user,req,res)
     }
 }
