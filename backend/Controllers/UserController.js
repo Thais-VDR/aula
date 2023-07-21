@@ -110,16 +110,16 @@ module.exports = class UserController {
 
     //Verificar se o usuario está logado
     static async checkUser(req, res) {
-        let currentUser 
+        let currentUser
 
-        if(req.headers.authorization){
+        if (req.headers.authorization) {
             const token = getToken(req)
             //jwt vem da biblioteca
 
-            const decoded = jwt.verify(token,'nossosecret')
+            const decoded = jwt.verify(token, 'nossosecret')
 
             currentUser = await User.findByPk(decoded.id) //findByPk = "Encontrar por chave primaria"(irá buscar pelo Id)
-           
+
             currentUser.password = undefined
             //Por questão de segurança a senha será entregue no front como 'indefinido' para não permitir sua visualização
         } else {
@@ -129,20 +129,91 @@ module.exports = class UserController {
         res.status(200).send(currentUser)
     }
 
-    static async getUserById(req, res){
+    static async getUserById(req, res) {
         const id = req.params.id
 
         const user = await User.findByPk(id, {
             where: { id: id }
         })
 
-        if(!user){
-            res.status(422).json({message: 'Usuario não encontrado'})
+        if (!user) {
+            res.status(422).json({ message: 'Usuario não encontrado' })
             return
         }
 
         user.password = undefined
 
         res.status(200).json({ user })
+    }
+
+    //Função editar o usuario
+    static async editUser(req, res) {
+        const id = req.params.id
+
+        //Checar se o usuario existe
+        const token = getToken(req)
+        const user = await getUserById(token)
+
+        //receber os dados nas variaveis
+        const { name, email, phone, password, confirmpassword } = req.body
+
+        //Recebendo imagem do usuario
+        let image = ''
+        if (req.file) {
+            image = req.file.filename //Pega apenas um nome no arquivo, que é o 'image'
+        }
+        //Validações de campos vazios
+        if (!name) {
+            res.status(422).json({ message: 'O nome é obrigatório' })
+        }
+        if (!email) {
+            res.status(422).json({ message: 'O email é obrigatório' })
+        }
+        const userExist = await User.findOne({ where: { email: email } })
+        if (user.email !== email && userExists) {
+            res.status(422).json({ message: 'Por favor utilize outro email' })
+            return
+        }
+        if (!phone) {
+            res.status(422).json({ message: 'O phone é obrigatório' })
+            return
+        }
+        user.phone = phone
+
+        if (password !== confirmpassword) {
+            res.status(422).json({ message: 'As senhas não batem' })
+            return
+        }else if(password === confirmpassword && password !== null){
+            //Criptografando senha 
+            const salt = await bcrypt.genSalt(12)
+            const passwordHash = await bcrypt.hash(password, salt)
+
+            user.password = passwordHash
+        }
+
+        const userToUpdate = await User.findByPk(id)
+        if(!userToUpdate){
+            res.status(422).json({message: 'Usuario não encontrado'})
+            return
+        }
+        userToUpdate.name = name
+        userToUpdate.email = email
+        userToUpdate.phone = phone
+        userToUpdate.image = image
+
+        if(password === confirmpassword && password !== null){
+            //Criptografando senha 
+            const salt = await bcrypt.genSalt(12)
+            const passwordHash = await bcrypt.hash(password, salt)
+
+            userToUpdate.password = passwordHash
+        }
+
+        try{
+            await userToUpdate.save()
+            res.status(200).json({message: 'Usuario atualizado com sucesso'})
+        } catch(error){
+            res.status(500).json({message: error.message})
+        }
     }
 }
