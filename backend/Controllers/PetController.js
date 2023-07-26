@@ -1,6 +1,7 @@
 //PetController.js
 const Pet = require('../Model/Pet')
 const User = require('../Model/User')
+const ImagePet = require('../Model/ImagePet')
 //bibliotecas
 const jwt = require('jsonwebtoken')
 
@@ -131,5 +132,67 @@ module.exports = class PetController { //Criar um controlador de Pets
         res.status(200).json({ message: 'Pet destruido com sucesso' })
 
     }
+    //Editar Pet
+    static async updatePet(req, res) {
+        const id = req.params.id
+        const { name, age, weight, color } = req.body
 
+        const updatePet = {}
+        const pet = await Pet.findByPk(id)
+
+        if (!pet) {
+            res.status(404).json({ message: 'Pet não existe' })
+            return
+        }
+        //Pegando o dono do pet
+        let currentUser
+        const token = getToken(req)
+        const decoded = jwt.verify(token, 'nossosecret')
+        currentUser = await User.findByPk(decoded.id)
+
+        if (pet.UserId !== currentUser.id) {
+            res.status(422).json({ message: 'ID invalido' })
+            return
+        }
+
+        if (!name) {
+            res.status(422).json({ message: 'O nome é obrigatório' })
+        } else {
+            updatePet.name = name //O nome que cair, vai armazenar no updatePet."name"
+        }
+        if (!age) {
+            res.status(422).json({ message: 'O age é obrigatório' })
+        } else {
+            updatePet.age = age //O ano que cair, vai armazenar no updatePet."age"
+        }
+        if (!weight) {
+            res.status(422).json({ message: 'O weight é obrigatório' })
+        } else {
+            updatePet.weight = weight //O peso que cair, vai armazenar no updatePet."weight"
+        }
+        if (!color) {
+            res.status(422).json({ message: 'O color é obrigatório' })
+        } else {
+            updatePet.color = color//A cor que cair, vai armazenar no updatePet."color"
+        }
+        //Trabalhar com as imagens
+        const images = req.files
+        if (!images || images.length === 0) {
+            res.status(422).json({ message: 'As imagens são obrigatorias' })
+            return
+        }
+        //Atualizar as imagens do pet
+        const imageFilename = images.map((image) => image.filename)//filename = nome do arquivo.
+        //Remover imagens antigas
+        await ImagePet.destroy({ where: { PetId: pet.id } })
+        //Adicionar novas imagens
+        for (let i = 0; i < imageFilename.length; i++) {
+            const filename = imageFilename[i]
+            const newImagePet = new ImagePet({ image: filename, PetId: pet.id })
+            await newImagePet.save()
+        }
+
+        await Pet.update(updatePet, { where: { id: id } })
+        res.status(200).json({ message: 'Pet atualizado com sucesso' })
+    }
 }

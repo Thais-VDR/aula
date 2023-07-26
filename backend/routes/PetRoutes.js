@@ -15,6 +15,8 @@ router.post('/create', verifyToken, imageUpload.array('images'), PetController.c
 router.get('/mypets', verifyToken, PetController.getAllUserPets)
 //Deletar um pet pelo ID
 router.delete('/:id', verifyToken, PetController.removePetById)
+//Editar Pet
+router.patch('/:id', verifyToken, imageUpload.array('images'), PetController.updatePet)
 
 //Rotas publicas = Vc está logado
 //Listar todos os pets
