@@ -195,4 +195,72 @@ module.exports = class PetController { //Criar um controlador de Pets
         await Pet.update(updatePet, { where: { id: id } })
         res.status(200).json({ message: 'Pet atualizado com sucesso' })
     }
+    //Agendamento de Pet
+    static async schedule(req, res) {
+        const id = req.params.id
+        const pet = await Pet.findByPk(id)
+
+        if (!pet) {
+            res.status(404).json({ message: 'Pet não existe' })
+            return
+        }
+        //Pegando o dono do pet
+        let currentUser
+        const token = getToken(req)
+        const decoded = jwt.verify(token, 'nossosecret')
+        currentUser = await User.findByPk(decoded.id)
+
+        if (pet.UserId === currentUser.id) {
+            res.status(422).json({ message: 'O pet já é seu' })
+            return
+        }
+
+        //Checar se o usuario já agendou a visita
+        if (pet.adopter) {
+            if (pet.adopter === currentUser.id) {
+                res.status(422).json({ message: 'Você já agendou uma visita' })
+            }
+        }
+        pet.adopter = currentUser.id
+        //Manda para o banco 
+        await pet.save()
+        res.status(200).json({ message: 'Pet adotado com sucesso' })
+
+    }
+    static async concludeAdoption(req, res) {
+        const id = req.params.id
+        const pet = await Pet.findByPk(id)
+
+        if (!pet) {
+            res.status(404).json({ message: 'Pet não existe' })
+            return
+        }
+        //Pegando o dono do pet
+        let currentUser
+        const token = getToken(req)
+        const decoded = jwt.verify(token, 'nossosecret')
+        currentUser = await User.findByPk(decoded.id)
+
+        if (pet.UserId !== currentUser.id) {
+            res.status(422).json({ message: 'ID invalido' })
+            return
+        }
+        //Pet não disponivel
+        pet.available = false
+        await pet.save()
+        res.status(200).json({ message: 'Adoção concluida!!!' })
+    }
+    static async getAllUserAdoptions(req, res) {
+        //Pegando o dono do pet
+        let currentUser
+        const token = getToken(req)
+        const decoded = jwt.verify(token, 'nossosecret')
+        currentUser = await User.findByPk(decoded.id)
+
+        const pets = await Pet.findAll({
+            where: { adopter: currentUser.id },
+            order: [['createdAt', 'DESC']]
+        })
+        res.status(200).json({ pets })
+    }
 }
