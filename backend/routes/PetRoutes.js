@@ -27,6 +27,8 @@ router.get('/myadoptions', verifyToken, PetController.getAllUserAdoptions)
 //Rotas publicas = Vc está logado
 //Listar todos os pets
 router.get('/', PetController.getAll)//Vai puxar todos os pets
+// Deletar um pet
+router.delete('/:id', verifyToken, PetController.removePetById)
 //Listar pet por ID
 router.get('/:id', PetController.getPetById)
 

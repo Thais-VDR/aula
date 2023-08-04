@@ -4,6 +4,7 @@ const User = require('../Model/User')
 const ImagePet = require('../Model/ImagePet')
 //bibliotecas
 const jwt = require('jsonwebtoken')
+const { json } = require('sequelize')
 
 //helpers
 const getToken = require('../helpers/get-token')

@@ -1,7 +1,11 @@
-import React from "react"
+import React, { useContext } from 'react'
 import { Link } from "react-router-dom"
+//Contexto
+import { Context } from '../../context/UserContext'
 
-function Navbar(){
+
+function Navbar() {
+    const { authenticated, logout } = useContext(Context)
     return (
         <nav className='navbar bg-warning'>
             <div className='container'>
@@ -11,15 +15,23 @@ function Navbar(){
                         <li className='nav-item'>
                             <Link className='nav-link' to='/'>Home</Link>
                         </li>
-                        <li className='nav-item'>
-                            <Link className='nav-link' to='/register'>Registrar</Link>
-                        </li>
-                        <li className='nav-item'>
-                            <Link className='nav-link' to='/login'>Login</Link>
-                        </li>
-                        <li className='nav-item'>
-                            <Link className='nav-link' to='/user/profile'>Perfil</Link>
-                        </li>
+                        {!authenticated ? ( //É um IF ELSE, se ele tiver autenticado alguma coisa, vai aparecer algo ou acontecer algo.
+                            <>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/register'>Registrar</Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/login'>Login</Link>
+                                </li>
+                            </>
+                        ) : (
+                            <>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/user/profile'>Perfil</Link>
+                                </li>
+                                <li className="nav-item"><Link className='nav-link' to='/'>Sair</Link></li>
+                            </>
+                        )}
                     </ul>
                 </div>
             </div>

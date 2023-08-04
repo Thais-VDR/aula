@@ -8,7 +8,9 @@ const jwt = require('jsonwebtoken')//permite o acesso da senha
 //helpers
 const createUserToken = require('../helpers/create-user-token')
 const getToken = require('../helpers/get-token')
-//const { json } = require('sequelize')
+const getUserById = require('../helpers/get-user-by-token')
+
+const { json } = require('sequelize')
 
 module.exports = class UserController {
     //criar usuario
@@ -183,7 +185,7 @@ module.exports = class UserController {
         if (password !== confirmpassword) {
             res.status(422).json({ message: 'As senhas não batem' })
             return
-        }else if(password === confirmpassword && password !== null){
+        } else if (password === confirmpassword && password !== null) {
             //Criptografando senha 
             const salt = await bcrypt.genSalt(12)
             const passwordHash = await bcrypt.hash(password, salt)
@@ -192,8 +194,8 @@ module.exports = class UserController {
         }
 
         const userToUpdate = await User.findByPk(id)
-        if(!userToUpdate){
-            res.status(422).json({message: 'Usuario não encontrado'})
+        if (!userToUpdate) {
+            res.status(422).json({ message: 'Usuario não encontrado' })
             return
         }
         userToUpdate.name = name
@@ -201,7 +203,7 @@ module.exports = class UserController {
         userToUpdate.phone = phone
         userToUpdate.image = image
 
-        if(password === confirmpassword && password !== null){
+        if (password === confirmpassword && password !== null) {
             //Criptografando senha 
             const salt = await bcrypt.genSalt(12)
             const passwordHash = await bcrypt.hash(password, salt)
@@ -209,11 +211,11 @@ module.exports = class UserController {
             userToUpdate.password = passwordHash
         }
 
-        try{
+        try {
             await userToUpdate.save()
-            res.status(200).json({message: 'Usuario atualizado com sucesso'})
-        } catch(error){
-            res.status(500).json({message: error.message})
+            res.status(200).json({ message: 'Usuario atualizado com sucesso' })
+        } catch (error) {
+            res.status(500).json({ message: error.message })
         }
     }
 }
