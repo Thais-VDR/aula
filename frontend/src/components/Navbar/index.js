@@ -29,7 +29,10 @@ function Navbar() {
                                 <li className='nav-item'>
                                     <Link className='nav-link' to='/user/profile'>Perfil</Link>
                                 </li>
-                                <li className="nav-item"><Link className='nav-link' to='/'>Sair</Link></li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/pet/create'>Cadastrar Pet</Link>
+                                </li>
+                                <li onClick={logout} className="nav-item"><Link className='nav-link' to='/'>Sair</Link></li>
                             </>
                         )}
                     </ul>

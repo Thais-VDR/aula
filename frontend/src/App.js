@@ -5,9 +5,10 @@ import Home from "./pages/Home";
 import Register from "./pages/users/Register";
 import Login from "./pages/users/Login";
 import Profile from "./pages/users/Profile";
-import NavBar from "./components/NavBar";
-import { UserProvider } from './context/UserContext';
-import Container from './components/Container';
+import NavBar from "./components/Navbar";
+import { UserProvider } from './context/UserContext'
+import Container from './components/Container'
+import AddPet from './pages/pets/AddPets'
 
 
 function App() {
@@ -15,13 +16,14 @@ function App() {
     <div className="App">
       <Router>
         <UserProvider>
-        <NavBar />
+          <NavBar />
           <Container>
             <Routes>
               <Route exact path="/" element={<Home />} />
               <Route exact path="/register" element={<Register />} />
               <Route exact path="/login" element={<Login />} />
               <Route exact path="/user/profile" element={<Profile />} />
+              <Route exact path="/pet/create" element={<AddPet />} />
             </Routes>
           </Container>
         </UserProvider>
@@ -29,5 +31,5 @@ function App() {
     </div>
   );
 }
-export default App;
 
+export default App;

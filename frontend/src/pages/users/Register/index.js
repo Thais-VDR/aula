@@ -1,5 +1,6 @@
 //Register/index.js
 //componente register 
+//componente register 
 import React from 'react'
 import InputGroup from '../../../components/InputGroup'
 
