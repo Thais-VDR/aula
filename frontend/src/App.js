@@ -11,6 +11,7 @@ import Container from './components/Container'
 import AddPet from './pages/pets/AddPets'
 import PetDetails from './pages/pets/PetDetails'
 import MyAdoptions from "./pages/pets/MyAdoptions";
+import MyPets from "./pages/pets/MyPets";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
               <Route exact path="/pet/create" element={<AddPet />} />
               <Route exact path="/pet/:id" element={<PetDetails />} />
               <Route exact path="/pet/myadoptions" element={<MyAdoptions />} />
+              <Route exact path="/pet/mypets" element={<MyPets />} />
             </Routes>
           </Container>
         </UserProvider>

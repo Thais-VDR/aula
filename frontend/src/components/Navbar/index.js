@@ -1,11 +1,11 @@
 import React, { useContext } from 'react'
-import { Link } from "react-router-dom"
+import { Link } from 'react-router-dom'
 //Contexto
 import { Context } from '../../context/UserContext'
 
-
-function Navbar() {
+function NavBar() {
     const { authenticated, logout } = useContext(Context)
+
     return (
         <nav className='navbar bg-warning'>
             <div className='container'>
@@ -15,7 +15,7 @@ function Navbar() {
                         <li className='nav-item'>
                             <Link className='nav-link' to='/'>Home</Link>
                         </li>
-                        {!authenticated ? ( //É um IF ELSE, se ele tiver autenticado alguma coisa, vai aparecer algo ou acontecer algo.
+                        {!authenticated ? (
                             <>
                                 <li className='nav-item'>
                                     <Link className='nav-link' to='/register'>Registrar</Link>
@@ -32,7 +32,13 @@ function Navbar() {
                                 <li className='nav-item'>
                                     <Link className='nav-link' to='/pet/create'>Cadastrar Pet</Link>
                                 </li>
-                                <li onClick={logout} className="nav-item"><Link className='nav-link' to='/'>Sair</Link></li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/pet/mypets'>Meu Pets</Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/pet/myadoptions'>Minhas adoções</Link>
+                                </li>
+                                <li onClick={logout} className='nav-item'><Link className='nav-link' to='/'>Sair</Link></li>
                             </>
                         )}
                     </ul>
@@ -41,4 +47,5 @@ function Navbar() {
         </nav>
     )
 }
-export default Navbar;
+
+export default NavBar
